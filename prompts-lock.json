@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "prompts": {
+    "hackathon_revamp_agent": {
+      "version": 3,
+      "versionId": "GBLlgmuIytaJKNJO6oEM6",
+      "materialized": "prompts/hackathon_revamp_agent.prompt.yaml"
+    },
+    "coding_agent": {
+      "version": 2,
+      "versionId": "bF4Te9FuEvQK8s_wPB9yH",
+      "materialized": "prompts/coding_agent.prompt.yaml"
+    }
+  }
+}

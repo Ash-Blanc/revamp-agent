@@ -1,0 +1,25 @@
+[project]
+name = "revamp"
+version = "0.1.0"
+description = "AI agent that transforms open-source GitHub projects into hackathon-winning solutions"
+requires-python = ">=3.13"
+dependencies = [
+    "agno>=2.3.24",
+    "cerebras-cloud-sdk>=1.64.1",
+    "ddgs>=9.10.0",
+    "fastapi>=0.128.0",
+    "firecrawl-py>=4.12.0",
+    "langwatch>=0.8.1",
+    "mistralai>=1.10.0",
+    "openai>=2.15.0",
+    "pygithub>=2.8.1",
+    "pytest>=9.0.2",
+    "pytest-dotenv>=0.5.2",
+    "python-dotenv>=1.2.1",
+    "uvicorn>=0.40.0",
+]
+
+[dependency-groups]
+dev = [
+    "langwatch-scenario>=0.7.14",
+]

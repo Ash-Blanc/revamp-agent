@@ -1,0 +1,6 @@
+{
+  "prompts": {
+    "hackathon_revamp_agent": "file:prompts/hackathon_revamp_agent.prompt.yaml",
+    "coding_agent": "file:prompts/coding_agent.prompt.yaml"
+  }
+}
