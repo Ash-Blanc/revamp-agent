@@ -30,6 +30,9 @@ except ImportError:
     from app.teams_workflows import get_revamp_team, get_revamp_workflow
 
 # Load environment variables
+# Try to load from current working directory first (for CLI usage)
+load_dotenv(os.path.join(os.getcwd(), ".env"))
+# Also try default loading (system env vars or local .env if script is run directly)
 load_dotenv()
 
 # Initialize LangWatch

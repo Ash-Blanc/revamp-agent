@@ -46,6 +46,9 @@ except ImportError:
     USE_EXTENDED_TOOLS = False
 
 # Load environment variables
+# Try to load from current working directory first (for CLI usage)
+load_dotenv(os.path.join(os.getcwd(), ".env"))
+# Also try default loading (system env vars or local .env if script is run directly)
 load_dotenv()
 
 # Initialize LangWatch
