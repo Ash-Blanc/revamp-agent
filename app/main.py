@@ -12,6 +12,8 @@ from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.tools.firecrawl import FirecrawlTools
+from agno.tools.file import FileTools
+from agno.tools.local_file_system import LocalFileSystemTools
 try:
     from app.tools import HackathonDiscoveryTools
     from app.memory_storage import get_memory_manager
@@ -46,6 +48,8 @@ session_manager = get_session_manager()
 tools = [
     DuckDuckGoTools(),
     HackathonDiscoveryTools(),  # Custom tools for discovering hackathons and projects
+    FileTools(),
+    LocalFileSystemTools(),
 ]
 if os.getenv("FIRECRAWL_API_KEY"):
     tools.append(FirecrawlTools())

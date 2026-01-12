@@ -15,6 +15,10 @@ from agno.agent import Agent
 from agno.models.openai import OpenAIChat
 from agno.tools.github import GithubTools
 from agno.tools.models.morph import MorphTools
+from agno.tools.shell import ShellTools
+from agno.tools.file import FileTools
+from agno.tools.local_file_system import LocalFileSystemTools
+from agno.tools.sleep import SleepTools
 
 # Import model providers
 try:
@@ -94,6 +98,12 @@ def get_coding_model():
 # Initialize tools
 tools = []
 
+# Add local system tools
+tools.append(ShellTools())
+tools.append(FileTools())
+tools.append(LocalFileSystemTools())
+tools.append(SleepTools())
+
 # Add GitHub tools if API key is available
 if os.getenv("GITHUB_ACCESS_TOKEN"):
     if USE_EXTENDED_TOOLS:
@@ -119,8 +129,9 @@ coding_agent = Agent(
 Your capabilities:
 1. **Code Analysis**: Read and understand codebases, architecture, and patterns
 2. **Code Modification**: Make precise code changes, refactoring, and enhancements
-3. **File Management**: Create, update, and delete files as needed
+3. **File Management**: Create, update, and delete files as needed (both local and remote)
 4. **Git Operations**: Work with branches, commits, and pull requests via GitHub API
+5. **System Operations**: Run shell commands and manage local files
 
 When making changes:
 - Follow existing code style and patterns
@@ -130,6 +141,7 @@ When making changes:
 - Use GitHub tools to read files before modifying them
 - Create branches for your changes
 - Make atomic commits with clear messages
+- Use local tools (Shell, File) when working on local projects
 
 Always read the current file content before modifying it to preserve existing functionality.""",
     tools=tools,

@@ -13,6 +13,8 @@ from agno.team import Team
 from agno.workflow import Workflow
 from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.tools.firecrawl import FirecrawlTools
+from agno.tools.file import FileTools
+from agno.tools.local_file_system import LocalFileSystemTools
 from .tools import HackathonDiscoveryTools
 from .memory_storage import get_memory_manager
 from .session_manager import get_session_manager
@@ -42,12 +44,16 @@ class ProjectAnalyzerAgent(Agent):
         - Identify potential areas for enhancement
         - Note any technical debt or improvement opportunities
         
-        Use available tools to gather information about the repository."""
+        Use available tools to gather information about the repository. You can access both GitHub repositories and local files."""
         
+        tools = [DuckDuckGoTools(), FileTools(), LocalFileSystemTools()]
+        if FirecrawlTools and __import__('os').environ.get("FIRECRAWL_API_KEY"):
+            tools.append(FirecrawlTools())
+
         super().__init__(
             model=OpenAIChat(id="gpt-4o"),
             instructions=instructions,
-            tools=[DuckDuckGoTools(), FirecrawlTools()] if FirecrawlTools and __import__('os').environ.get("FIRECRAWL_API_KEY") else [DuckDuckGoTools()],
+            tools=tools,
             markdown=True,
         )
 
