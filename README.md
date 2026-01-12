@@ -1,4 +1,4 @@
-# Hackathon Project Revamp Agent
+# Revamp Agent
 
 An AI agent that transforms open-source GitHub projects into hackathon-winning solutions through strategic analysis, research, and innovation.
 
