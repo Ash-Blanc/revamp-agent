@@ -14,12 +14,18 @@ from agno.tools.duckduckgo import DuckDuckGoTools
 from agno.tools.firecrawl import FirecrawlTools
 try:
     from app.tools import HackathonDiscoveryTools
+    from app.memory_storage import get_memory_manager
+    from app.session_manager import get_session_manager, SessionStatus
+    from app.teams_workflows import get_revamp_team, get_revamp_workflow
 except ImportError:
     # Handle relative import for direct execution
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent.parent))
     from app.tools import HackathonDiscoveryTools
+    from app.memory_storage import get_memory_manager
+    from app.session_manager import get_session_manager, SessionStatus
+    from app.teams_workflows import get_revamp_team, get_revamp_workflow
 
 # Load environment variables
 load_dotenv()
@@ -32,8 +38,10 @@ langwatch.setup(
 # Get the prompt from LangWatch
 prompt = langwatch.prompts.get("hackathon_revamp_agent")
 
-# Create the agent with LangWatch instrumentation
-# Agno automatically instruments with LangWatch when langwatch is imported
+# Initialize memory and session managers
+memory_manager = get_memory_manager()
+session_manager = get_session_manager()
+
 # Initialize tools
 tools = [
     DuckDuckGoTools(),
@@ -42,6 +50,7 @@ tools = [
 if os.getenv("FIRECRAWL_API_KEY"):
     tools.append(FirecrawlTools())
 
+# Create the agent with memory integration
 agent = Agent(
     model=OpenAIChat(id="gpt-4o"),
     instructions=prompt.prompt if prompt else "You are a helpful assistant.",

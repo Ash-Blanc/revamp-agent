@@ -16,8 +16,13 @@ dependencies = [
     "pytest>=9.0.2",
     "pytest-dotenv>=0.5.2",
     "python-dotenv>=1.2.1",
+    "rich>=14.2.0",
+    "typer>=0.21.1",
     "uvicorn>=0.40.0",
 ]
+
+[project.scripts]
+revamp = "app.cli:app"
 
 [dependency-groups]
 dev = [

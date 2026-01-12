@@ -2201,6 +2201,8 @@ dependencies = [
     { name = "pytest" },
     { name = "pytest-dotenv" },
     { name = "python-dotenv" },
+    { name = "rich" },
+    { name = "typer" },
     { name = "uvicorn" },
 ]
 
@@ -2223,6 +2225,8 @@ requires-dist = [
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-dotenv", specifier = ">=0.5.2" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "rich", specifier = ">=14.2.0" },
+    { name = "typer", specifier = ">=0.21.1" },
     { name = "uvicorn", specifier = ">=0.40.0" },
 ]
 
