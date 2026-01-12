@@ -182,18 +182,56 @@ def generate(
 
 
 @app.command()
-def test():
+def test(
+    command: Optional[str] = typer.Option(None, "--command", "-c", help="Custom test command to run"),
+):
     """
-    Run project tests using pytest.
+    Run project tests.
+    
+    Automatically detects project type and runs appropriate test command:
+    - Python: `uv run pytest` or `pytest`
+    - Node.js: `npm test`
+    - Rust: `cargo test`
+    - Go: `go test ./...`
+    
+    You can override this detection with the --command option.
     """
     console.print(Panel("🧪 Running tests...", style="yellow"))
+    
+    test_cmd = []
+    
+    if command:
+        test_cmd = command.split()
+    else:
+        # Auto-detect project type
+        path = Path(".")
+        if (path / "pyproject.toml").exists() or (path / "requirements.txt").exists():
+            if (path / "uv.lock").exists():
+                test_cmd = ["uv", "run", "pytest"]
+            else:
+                test_cmd = ["pytest"]
+        elif (path / "package.json").exists():
+            test_cmd = ["npm", "test"]
+        elif (path / "Cargo.toml").exists():
+            test_cmd = ["cargo", "test"]
+        elif (path / "go.mod").exists():
+            test_cmd = ["go", "test", "./..."]
+        elif (path / "pom.xml").exists():
+            test_cmd = ["mvn", "test"]
+        else:
+            console.print("[yellow]Could not detect project type. Defaulting to pytest.[/yellow]")
+            test_cmd = ["pytest"]
+            
+    console.print(f"[dim]Executing: {' '.join(test_cmd)}[/dim]")
+
     try:
-        subprocess.run(["uv", "run", "pytest"], check=True)
+        subprocess.run(test_cmd, check=True)
+        console.print("[green]Tests passed![/green]")
     except subprocess.CalledProcessError:
         console.print("[red]Tests failed![/red]")
         sys.exit(1)
     except FileNotFoundError:
-        console.print("[red]uv or pytest not found. Make sure dependencies are installed.[/red]")
+        console.print(f"[red]Command not found: {test_cmd[0]}. Please ensure dependencies are installed.[/red]")
         sys.exit(1)
 
 
