@@ -24,6 +24,9 @@ dependencies = [
 [project.scripts]
 revamp = "app.cli:app"
 
+[tool.uv]
+package = true
+
 [dependency-groups]
 dev = [
     "langwatch-scenario>=0.7.14",
