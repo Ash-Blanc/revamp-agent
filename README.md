@@ -1,129 +1,124 @@
 # Revamp Agent
 
-**An AI-powered autonomous agent for strategically enhancing open-source projects.**
+> *"In the vast expanse of open-source code, greatness often lies dormant, waiting for a vision to awaken it."*
 
-Revamp Agent utilizes advanced Large Language Models (LLMs) and the Agno framework to analyze GitHub repositories, research hackathon criteria, and generate comprehensive modernization strategies. It automates the process of code analysis, strategic planning, and implementation, enabling developers to transform existing codebases into competitive, hackathon-ready solutions.
+**The Revamp Agent is your digital charioteer—an AI-powered architect designed to navigate the chaotic battlefield of hackathons and steer existing projects toward victory.**
 
----
-
-## 📋 Project Overview
-
-The **Revamp Agent** is designed to bridge the gap between existing open-source software and the specific, often novel requirements of hackathons. By leveraging a multi-agent architecture, it performs deep semantic analysis of codebases and correlates findings with real-time web research on hackathon themes and judging criteria.
-
-### Core Capabilities
-*   **Automated Codebase Analysis**: Deep inspection of repository structure, dependencies, and code patterns.
-*   **Strategic Market Research**: Real-time scraping and analysis of hackathon websites to identify winning trends and criteria.
-*   **Autonomous Implementation**: Optional capability to generate and apply code patches, new features, and documentation updates directly to the repository.
-*   **Multi-Modal Interfaces**: Accessible via Command Line Interface (CLI), Web UI, and Python API.
+By harnessing the wisdom of advanced Large Language Models (LLMs) and the orchestrating power of the Agno framework, this agent does not merely analyze code; it perceives potential. It studies the landscape of competition, forges a master strategy, and can even take up the hammer to rebuild the codebase itself.
 
 ---
 
-## ✨ Features
+## 📜 The Saga (Project Overview)
 
-*   **Intelligent Strategy Generation**: Produces detailed reports covering strategic positioning, novel feature suggestions, and technical improvements.
-*   **Multi-Agent Orchestration**: Utilizes specialized agents for research, strategy, and coding tasks, orchestrated by the Agno framework.
-*   **Seamless Integration**:
-    *   **GitHub**: Direct integration for reading repositories and creating pull requests.
-    *   **Firecrawl**: Robust web scraping for gathering hackathon intelligence.
-    *   **LangWatch**: Enterprise-grade prompt management and observability.
-*   **Dual Operation Modes**:
-    *   **Analysis Mode**: Generates strategic reports without modifying code.
-    *   **Implementation Mode**: Applies changes directly via forking or branching.
-*   **Developer-First Tooling**: Includes a comprehensive CLI, a modern Web UI, and a simplified setup wizard.
+The journey from a static repository to a winning hackathon submission is fraught with uncertainty. The **Revamp Agent** was forged to bridge this divide. It acts as a bridge between *what is*—your existing open-source software—and *what could be*—a novel, judge-pleasing innovation.
+
+Through a symphony of specialized sub-agents, it performs a deep semantic reading of your code, simultaneously casting its gaze across the web to understand the pulse of current hackathons. It aligns technical reality with market desire, ensuring your project is not just functional, but destined for the podium.
+
+### The Three Pillars of Transformation
+*   **The Eye of Insight (Analysis)**: It peers into the depths of your repository, understanding structure, dependencies, and hidden patterns.
+*   **The Mind of Strategy (Research)**: It traverses the digital realm, scraping hackathon criteria to uncover exactly what judges seek.
+*   **The Hand of Creation (Implementation)**: It possesses the capability to weave new code, crafting patches and features to bring the strategy to life.
 
 ---
 
-## 🛠️ Technology Stack
+## 🔮 The Arsenal (Features)
 
-*   **Language**: Python 3.13+
-*   **Agent Framework**: [Agno](https://docs.agno.com/)
-*   **Package Management**: `uv`
-*   **LLMs**: OpenAI GPT-4o (Strategy), Cerebras/Mistral (Coding)
-*   **Infrastructure**:
-    *   **Firecrawl**: Web scraping and content extraction.
-    *   **LangWatch**: Prompt engineering, management, and testing.
-    *   **Scenario**: End-to-end agent behavior testing.
+*   **Prophetic Strategy Generation**: Delivers more than a report—it provides a battle plan. Expect detailed strategic positioning, novel feature concepts, and a roadmap for technical dominance.
+*   **Council of Agents**: Orchestrated by the **Agno framework**, specialized agents (The Researcher, The Strategist, The Coder) collaborate in harmony to solve complex problems.
+*   **Tools of Power**:
+    *   **GitHub Integration**: To read the history of your code and inscribe its future.
+    *   **Firecrawl**: To gather intelligence from the farthest reaches of the web.
+    *   **LangWatch**: To maintain clarity and memory across the agent's thoughts.
+*   **Dual Paths of Action**:
+    *   **The Path of Wisdom (Analysis Mode)**: Receive a comprehensive strategy without altering a single line of code.
+    *   **The Path of Action (Implementation Mode)**: Empower the agent to fork your repo and forge the changes directly.
 
 ---
 
-## ⚙️ Installation
+## 🏛️ The Foundation (Tech Stack)
 
-### Prerequisites
-*   Python 3.13 or higher
-*   Git
-*   [uv](https://github.com/astral-sh/uv) (Recommended package manager)
+Built upon modern pillars of technology:
 
-### Automated Setup (Recommended)
-The included setup wizard handles dependency installation, environment configuration, and verification.
+*   **The Core**: Python 3.13+
+*   **The Framework**: [Agno](https://docs.agno.com/) (The Orchestrator)
+*   **The Intellect**: OpenAI GPT-4o (Strategy), Cerebras/Mistral (Coding)
+*   **The Tools**:
+    *   **`uv`**: For swift and precise dependency management.
+    *   **Firecrawl**: For relentless information gathering.
+    *   **Scenario**: To simulate and test the agent's foresight.
+
+---
+
+## ⚡ The Ritual (Installation)
+
+To summon the agent, one must first prepare the environment.
+
+### The Guided Invocation (Recommended)
+Let the wizard guide you through the setup, weaving the necessary spells (dependencies) and keys automatically.
 
 ```bash
 python setup_wizard.py
 ```
 
-### Manual Installation
+### The Manual Rite
+For those who prefer to shape their own destiny:
 
-1.  **Clone the repository:**
+1.  **Claim the Repository:**
     ```bash
     git clone https://github.com/your-org/revamp.git
     cd revamp
     ```
 
-2.  **Install dependencies using `uv`:**
+2.  **Gather Supplies:**
     ```bash
     uv sync
     ```
 
-3.  **Configure environment variables:**
-    Copy the example configuration and update it with your API keys.
+3.  **Grant Permissions (Configuration):**
+    inscribe your API keys into the sacred `.env` file.
     ```bash
     cp .env.example .env
     ```
-    *See the [Configuration](#-configuration) section for required keys.*
 
 ---
 
-## 🚀 Usage
+## 🎮 The Command (Usage)
 
-Revamp Agent offers multiple interfaces to suit different workflows.
+The agent awaits your instruction through multiple interfaces.
 
-### 1. Command Line Interface (CLI)
+### 1. The Command Line (CLI)
+*Direct communion with the core.*
 
-**Analyze a project for a specific hackathon:**
+**To seek a strategy for a specific battle:**
 ```bash
 uv run revamp analyze --github https://github.com/user/repo --hackathon https://hackathon-url.com
 ```
 
-**Discovery Mode (Find relevant hackathons):**
+**To discover new battlegrounds (Discovery Mode):**
 ```bash
 uv run revamp analyze --topic "Generative AI"
 ```
 
-**Full Implementation (Fork and Apply Changes):**
+**To authorize full transformation (Fork & Code):**
 ```bash
 uv run revamp generate --github https://github.com/user/repo --hackathon https://hackathon-url.com --fork
 ```
 
-**Start Interactive Mode:**
-```bash
-uv run revamp interactive
-```
-
-### 2. Web Interface
-
-Launch the local web server to interact with the agent via a graphical interface.
+### 2. The Web Interface
+*A visual portal for the visionary.*
 
 ```bash
 uv run revamp web
 ```
-Access the interface at `http://localhost:8000`.
+Open the portal at `http://localhost:8000`.
 
-### 3. Python API
-
-Integrate Revamp Agent into your own Python applications.
+### 3. The Python API
+*Weave the agent's power into your own creations.*
 
 ```python
 from app.main import revamp_project
 
+# Summon the strategy
 result = revamp_project(
     github_url="https://github.com/user/repo",
     hackathon_url="https://hackathon-url.com"
@@ -133,68 +128,34 @@ print(result.strategy)
 
 ---
 
-## 🔧 Configuration
+## 🤝 The Gathering (Contributing)
 
-The application requires several API keys to function fully. Configure these in your `.env` file.
+We invite all architects and visionaries to contribute. This project adheres to the **Better Agents** standard.
 
-| Variable | Description | Required |
-|----------|-------------|:--------:|
-| `OPENAI_API_KEY` | Core LLM reasoning (GPT-4o). | Yes |
-| `LANGWATCH_API_KEY` | Prompt management and observability. | Yes |
-| `FIRECRAWL_API_KEY` | Web scraping for hackathon research. | Optional |
-| `GITHUB_ACCESS_TOKEN` | Repository access for implementation mode. | Optional |
-| `CEREBRAS_API_KEY` | High-speed inference for coding tasks. | Optional |
+*   **The Law of Prompts**: Do not hardcode the agent's thoughts. Use `langwatch` CLI to manage prompts in `prompts/`.
+*   **The Law of Testing**: Every new power must be proven. Write Scenario tests in `tests/scenarios/`.
+*   **The Law of Order**: Use `uv` to keep our dependencies in harmony.
 
----
-
-## 🏗️ Project Structure
-
-```
-revamp/
-├── app/
-│   ├── agents/            # Specialized agent implementations
-│   ├── core/              # Core framework components
-│   ├── teams/             # Multi-agent coordination logic
-│   ├── tools/             # External tool integrations (GitHub, Firecrawl)
-│   ├── workflows/         # End-to-end execution flows
-│   ├── main.py            # Application entry point
-│   └── cli.py             # CLI command definitions
-├── prompts/               # Managed YAML prompts (synced via LangWatch)
-├── tests/
-│   ├── scenarios/         # End-to-end behavioral tests
-│   └── evaluations/       # Component performance evaluations
-├── AGENTS.md              # Development standards and guidelines
-└── pyproject.toml         # Project dependencies and metadata
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! This project adheres to the **Better Agents** standard. Please ensure you follow these guidelines:
-
-1.  **Prompt Management**: Do not hardcode prompts. Use the `langwatch` CLI to manage prompts in the `prompts/` directory.
-2.  **Testing**:
-    *   **Scenario Tests**: Every new feature must include end-to-end tests in `tests/scenarios/`.
-    *   **Evaluations**: Use Jupyter notebooks in `tests/evaluations/` for component metrics.
-3.  **Dependencies**: Use `uv` for all dependency management (`uv add`, `uv sync`).
-
-To run tests:
+To verify the integrity of the build:
 ```bash
 uv run pytest
 ```
 
 ---
 
-## 📄 License
+## 📜 License
 
-[License Information] - Please refer to the repository for license details.
+[License Information] - The code is free, but the wisdom is earned.
 
 ---
 
-## 📚 Resources
+**"Go forth, and let your code tell a new story."**
 
-*   [Usage Guide](USAGE_GUIDE.md)
-*   [Development Guidelines](AGENTS.md)
+---
+
+## 📚 Chronicles (Resources)
+
+*   [The Usage Guide](USAGE_GUIDE.md)
+*   [The Developer's Codex (AGENTS.md)](AGENTS.md)
 *   [Refactoring Summary](REFACTORING_SUMMARY.md)
 *   [Agno Framework Documentation](https://docs.agno.com/)
