@@ -6,72 +6,65 @@ hackathon-winning solutions through strategic analysis, research, and innovation
 """
 
 import os
+from typing import Dict, Any, Optional
 from dotenv import load_dotenv
-import langwatch
-from agno.agent import Agent
-from agno.models.openai import OpenAIChat
-from agno.tools.duckduckgo import DuckDuckGoTools
-from agno.tools.firecrawl import FirecrawlTools
-from agno.tools.file import FileTools
-from agno.tools.local_file_system import LocalFileSystemTools
+
 try:
-    from app.tools import HackathonDiscoveryTools
-    from app.memory_storage import get_memory_manager
-    from app.session_manager import get_session_manager, SessionStatus
-    from app.teams_workflows import get_revamp_team, get_revamp_workflow
+    from .core.agent_factory import AgentFactory
+    from .teams.revamp_team import RevampTeam
+    from .workflows.revamp_workflow import RevampWorkflow
+    from .memory_storage import get_memory_manager
+    from .session_manager import get_session_manager, SessionStatus
+    from .core.exceptions import RevampError, ConfigurationError
 except ImportError:
     # Handle relative import for direct execution
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from app.tools import HackathonDiscoveryTools
+    from app.core.agent_factory import AgentFactory
+    from app.teams.revamp_team import RevampTeam
+    from app.workflows.revamp_workflow import RevampWorkflow
     from app.memory_storage import get_memory_manager
     from app.session_manager import get_session_manager, SessionStatus
-    from app.teams_workflows import get_revamp_team, get_revamp_workflow
+    from app.core.exceptions import RevampError, ConfigurationError
 
 # Load environment variables
-# Try to load from current working directory first (for CLI usage)
 load_dotenv(os.path.join(os.getcwd(), ".env"))
-# Also try default loading (system env vars or local .env if script is run directly)
 load_dotenv()
 
-# Initialize LangWatch
-langwatch.setup(
-    api_key=os.getenv("LANGWATCH_API_KEY"),
-)
-
-# Get the prompt from LangWatch
-prompt = langwatch.prompts.get("hackathon_revamp_agent")
-
-# Initialize memory and session managers
+# Initialize managers
 memory_manager = get_memory_manager()
 session_manager = get_session_manager()
 
-# Initialize tools
-tools = [
-    DuckDuckGoTools(),
-    HackathonDiscoveryTools(),  # Custom tools for discovering hackathons and projects
-    FileTools(),
-    LocalFileSystemTools(),
-]
-if os.getenv("FIRECRAWL_API_KEY"):
-    tools.append(FirecrawlTools())
+# Initialize factory for creating agents
+agent_factory = AgentFactory()
 
-# Create the agent with memory integration
-agent = Agent(
-    model=OpenAIChat(id="gpt-4o"),
-    instructions=prompt.prompt if prompt else "You are a helpful assistant.",
-    tools=tools,
-    markdown=True,
-)
+# Create default instances for backward compatibility
+_default_team = None
+_default_workflow = None
+
+def get_default_team() -> RevampTeam:
+    """Get or create the default revamp team."""
+    global _default_team
+    if _default_team is None:
+        _default_team = RevampTeam()
+    return _default_team
+
+def get_default_workflow() -> RevampWorkflow:
+    """Get or create the default revamp workflow."""
+    global _default_workflow
+    if _default_workflow is None:
+        _default_workflow = RevampWorkflow()
+    return _default_workflow
 
 
 def revamp_project(
-    github_url: str = None,
-    hackathon_url: str = None,
-    hackathon_context: str = None,
+    github_url: Optional[str] = None,
+    hackathon_url: Optional[str] = None,
+    hackathon_context: Optional[str] = None,
     search_order: str = "projects_first",
-    search_topic: str = None
+    search_topic: Optional[str] = None,
+    use_team: bool = False
 ) -> str:
     """
     Revamp an open-source GitHub project for a specific hackathon.
@@ -86,6 +79,7 @@ def revamp_project(
             - "projects_first": Find GitHub projects first, then find hackathons for them (default)
             - "hackathons_first": Find hackathons first, then find projects for them
         search_topic: Topic/theme to guide discovery when URLs are not provided (optional)
+        use_team: Whether to use team-based approach (default: False, uses single agent)
     
     Returns:
         Comprehensive revamp strategy and recommendations
@@ -93,103 +87,56 @@ def revamp_project(
     Note: If neither github_url nor hackathon_url is provided, the agent will use discovery tools
     to find relevant options based on search_topic or general ongoing hackathons/projects.
     """
-    # Build the query based on what's provided
-    query_parts = []
-    needs_discovery = []
-    
-    if github_url:
-        query_parts.append(f"GitHub Project: {github_url}")
-    else:
-        needs_discovery.append("github_project")
-    
-    if hackathon_url:
-        query_parts.append(f"Hackathon Website: {hackathon_url}")
-        query_parts.append(
-            "Please scrape and analyze the hackathon website to understand: "
-            "themes, judging criteria, prizes, deadlines, requirements, and any specific focus areas."
+    try:
+        # Validate inputs
+        from .utils.validation import validate_inputs
+        validated = validate_inputs(
+            github_url=github_url,
+            hackathon_url=hackathon_url,
+            hackathon_context=hackathon_context,
+            search_topic=search_topic,
+            search_order=search_order
         )
-    else:
-        needs_discovery.append("hackathon")
-    
-    if hackathon_context:
-        query_parts.append(f"Additional Hackathon Context: {hackathon_context}")
-    
-    # Build discovery instructions
-    discovery_instructions = []
-    
-    if needs_discovery:
-        if len(needs_discovery) == 2:
-            # Both are missing - use search_order
-            if search_order == "hackathons_first":
-                discovery_instructions.append(
-                    "1. First, use the find_ongoing_hackathons tool to discover relevant, ongoing hackathons. "
-                    f"{'Focus on: ' + search_topic if search_topic else 'Look for popular and relevant hackathons'}."
-                )
-                discovery_instructions.append(
-                    "2. Then, for each discovered hackathon, use find_projects_for_hackathon to find GitHub projects "
-                    "that would be a good fit for that hackathon's theme."
-                )
-                discovery_instructions.append(
-                    "3. Present the discovered options and select the best matches for revamp strategy."
-                )
-            else:  # projects_first (default)
-                discovery_instructions.append(
-                    "1. First, use the find_relevant_github_projects tool to discover relevant GitHub projects. "
-                    f"{'Focus on topic: ' + search_topic if search_topic else 'Look for interesting open-source projects'}."
-                )
-                discovery_instructions.append(
-                    "2. Then, for each discovered project, use find_hackathons_for_project to find hackathons "
-                    "that would be a good fit for that project's topic/tech stack."
-                )
-                discovery_instructions.append(
-                    "3. Present the discovered options and select the best matches for revamp strategy."
-                )
-        elif "github_project" in needs_discovery:
-            discovery_instructions.append(
-                "Use the find_relevant_github_projects tool to discover relevant GitHub projects. "
-                f"{'Focus on topic: ' + search_topic if search_topic else 'Look for projects that align with the hackathon theme'}."
+        
+        # Print warnings if any
+        if validated.get("warnings"):
+            for warning in validated["warnings"]:
+                print(f"Warning: {warning}")
+        
+        if use_team:
+            # Use team-based approach
+            team = get_default_team()
+            return team.create_strategy_only(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                hackathon_context=hackathon_context,
+                search_topic=search_topic
             )
-        elif "hackathon" in needs_discovery:
-            discovery_instructions.append(
-                "Use the find_ongoing_hackathons tool to discover relevant, ongoing hackathons. "
-                f"{'Focus on: ' + search_topic if search_topic else 'Look for hackathons that align with the project'}."
+        else:
+            # Use single agent approach
+            strategy_agent = agent_factory.create_strategy_agent()
+            return strategy_agent.create_revamp_strategy(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                hackathon_context=hackathon_context,
+                search_order=search_order,
+                search_topic=search_topic
             )
-    
-    query = f"""
-    Analyze the provided information and create a winning hackathon revamp strategy:
-    
-    {chr(10).join(query_parts) if query_parts else 'No specific URLs provided - discovery mode activated.'}
-    
-    {chr(10).join(discovery_instructions) if discovery_instructions else ''}
-    
-    Please provide:
-    1. Project analysis (if GitHub URL provided or discovered: structure, features, tech stack, strengths/weaknesses)
-    2. Hackathon analysis (if hackathon URL provided or discovered: themes, criteria, requirements, focus areas)
-    3. Strategic positioning that aligns the project with hackathon goals
-    4. Novel feature proposals that differentiate the project
-    5. Comprehensive revamp plan with actionable steps
-    6. Demo and presentation recommendations
-    7. Differentiation tactics
-    
-    Focus on novelty, strategy, and research-backed enhancements.
-    Use web scraping tools (Firecrawl) to gather detailed information from hackathon websites when URLs are provided.
-    Use discovery tools (find_ongoing_hackathons, find_relevant_github_projects, etc.) when URLs are not provided.
-    """
-    
-    response = agent.run(query)
-    return response.content
+    except Exception as e:
+        raise RevampError(f"Failed to create revamp strategy: {str(e)}")
 
 
 def revamp_and_implement(
-    github_url: str = None,
-    hackathon_url: str = None,
-    hackathon_context: str = None,
+    github_url: Optional[str] = None,
+    hackathon_url: Optional[str] = None,
+    hackathon_context: Optional[str] = None,
     search_order: str = "projects_first",
-    search_topic: str = None,
+    search_topic: Optional[str] = None,
     implement_changes: bool = False,
     fork_repo: bool = False,
-    branch_name: str = "hackathon-revamp"
-) -> dict:
+    branch_name: str = "hackathon-revamp",
+    use_workflow: bool = True
+) -> Dict[str, Any]:
     """
     Complete revamp workflow: strategy + optional implementation.
     
@@ -206,71 +153,130 @@ def revamp_and_implement(
         implement_changes: If True, implement the strategy via coding agent (default: False)
         fork_repo: If True, fork the repository before implementing (default: False)
         branch_name: Name of the branch for changes (default: 'hackathon-revamp')
+        use_workflow: Whether to use workflow-based approach (default: True)
     
     Returns:
         Dictionary with:
         - strategy: The revamp strategy text
         - implementation: Implementation summary (if implement_changes=True)
         - repo_name: Repository name used for implementation
+        - execution_summary: Workflow execution details (if use_workflow=True)
     """
-    # Step 1: Generate revamp strategy
-    strategy = revamp_project(
+    try:
+        # Validate inputs
+        from .utils.validation import validate_inputs, validate_implementation_inputs
+        
+        validated = validate_inputs(
+            github_url=github_url,
+            hackathon_url=hackathon_url,
+            hackathon_context=hackathon_context,
+            search_topic=search_topic,
+            search_order=search_order
+        )
+        
+        impl_validated = validate_implementation_inputs(
+            github_url=github_url,
+            implement_changes=implement_changes,
+            fork_repo=fork_repo,
+            branch_name=branch_name
+        )
+        
+        # Print warnings if any
+        all_warnings = validated.get("warnings", []) + impl_validated.get("warnings", [])
+        for warning in all_warnings:
+            print(f"Warning: {warning}")
+        
+        if use_workflow:
+            # Use workflow-based approach
+            workflow = RevampWorkflow(include_coding_agent=implement_changes)
+            result = workflow.execute(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                hackathon_context=hackathon_context,
+                search_topic=search_topic,
+                implement_changes=implement_changes,
+                fork_repo=fork_repo,
+                branch_name=branch_name
+            )
+            
+            # Add repo name from validation
+            if validated.get("github_repo_name"):
+                result["repo_name"] = validated["github_repo_name"]
+            
+            return result
+        else:
+            # Use legacy approach for backward compatibility
+            strategy = revamp_project(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                hackathon_context=hackathon_context,
+                search_order=search_order,
+                search_topic=search_topic
+            )
+            
+            result = {
+                "strategy": strategy,
+                "implementation": None,
+                "repo_name": validated.get("github_repo_name")
+            }
+            
+            # Step 2: Implement changes if requested
+            if implement_changes:
+                coding_agent = agent_factory.create_coding_agent()
+                
+                repo_name = validated.get("github_repo_name")
+                if not repo_name:
+                    result["implementation"] = "Repository name required for implementation. Please provide github_url."
+                    return result
+                
+                if fork_repo:
+                    implementation = coding_agent.fork_and_implement(
+                        original_repo=repo_name,
+                        revamp_strategy=strategy,
+                        branch_name=branch_name
+                    )
+                else:
+                    implementation = coding_agent.implement_strategy(
+                        repo_name=repo_name,
+                        revamp_strategy=strategy,
+                        branch_name=branch_name
+                    )
+                
+                result["implementation"] = implementation
+            
+            return result
+            
+    except Exception as e:
+        raise RevampError(f"Failed to execute revamp workflow: {str(e)}")
+
+
+# Convenience functions for specific use cases
+def analyze_project_only(github_url: str) -> str:
+    """Analyze a GitHub project only."""
+    project_analyzer = agent_factory.create_project_analyzer()
+    return project_analyzer.analyze_project(github_url)
+
+
+def research_hackathon_only(hackathon_url: str) -> str:
+    """Research a hackathon only."""
+    hackathon_researcher = agent_factory.create_hackathon_researcher()
+    return hackathon_researcher.research_hackathon(hackathon_url)
+
+
+def create_strategy_with_team(
+    github_url: Optional[str] = None,
+    hackathon_url: Optional[str] = None,
+    hackathon_context: Optional[str] = None,
+    search_topic: Optional[str] = None
+) -> Dict[str, Any]:
+    """Create strategy using team collaboration."""
+    team = get_default_team()
+    return team.execute(
         github_url=github_url,
         hackathon_url=hackathon_url,
         hackathon_context=hackathon_context,
-        search_order=search_order,
         search_topic=search_topic
     )
-    
-    result = {
-        "strategy": strategy,
-        "implementation": None,
-        "repo_name": None
-    }
-    
-    # Step 2: Implement changes if requested
-    if implement_changes:
-        try:
-            from app.coding_agent import implement_revamp_strategy, fork_and_revamp
-            
-            # Extract repo name from github_url if provided
-            repo_name = None
-            if github_url:
-                # Extract owner/repo from URL
-                import re
-                match = re.search(r'github\.com/([^/]+/[^/]+)', github_url)
-                if match:
-                    repo_name = match.group(1)
-            
-            if not repo_name:
-                # Try to extract from strategy or ask user
-                result["implementation"] = "Repository name required for implementation. Please provide github_url or repo_name."
-                return result
-            
-            if fork_repo:
-                # Fork and implement
-                implementation = fork_and_revamp(
-                    original_repo=repo_name,
-                    revamp_strategy=strategy,
-                    branch_name=branch_name
-                )
-            else:
-                # Implement directly (user must have write access or work on their fork)
-                implementation = implement_revamp_strategy(
-                    repo_name=repo_name,
-                    revamp_strategy=strategy,
-                    branch_name=branch_name
-                )
-            
-            result["implementation"] = implementation
-            result["repo_name"] = repo_name
-            
-        except ImportError as e:
-            result["implementation"] = f"Error importing coding agent: {e}"
-        except Exception as e:
-            result["implementation"] = f"Error during implementation: {e}"
-    
-    return result
 
 
 def main():

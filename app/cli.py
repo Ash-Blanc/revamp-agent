@@ -236,15 +236,210 @@ def test(
 
 
 @app.command()
+def interactive():
+    """
+    Interactive mode for guided revamp process.
+    """
+    console.print(Panel("🎯 Interactive Revamp Mode", style="cyan"))
+    console.print("Let's build your hackathon strategy step by step!\n")
+    
+    # Step 1: Choose mode
+    console.print("[bold]Step 1: Choose your starting point[/bold]")
+    console.print("1. I have both GitHub repo and hackathon URLs")
+    console.print("2. I have a GitHub repo, need to find hackathons")
+    console.print("3. I have a hackathon, need to find projects")
+    console.print("4. I want to discover both (surprise me!)")
+    
+    mode = typer.prompt("Choose option (1-4)", type=int)
+    
+    github_url = None
+    hackathon_url = None
+    topic = None
+    
+    if mode == 1:
+        github_url = typer.prompt("GitHub repository URL")
+        hackathon_url = typer.prompt("Hackathon website URL")
+    elif mode == 2:
+        github_url = typer.prompt("GitHub repository URL")
+        topic = typer.prompt("Search topic (e.g., AI, web3, climate)", default="")
+    elif mode == 3:
+        hackathon_url = typer.prompt("Hackathon website URL")
+    elif mode == 4:
+        topic = typer.prompt("What topic interests you? (e.g., AI, web3, climate)")
+    
+    # Step 2: Implementation options
+    console.print("\n[bold]Step 2: Implementation options[/bold]")
+    implement = typer.confirm("Do you want to automatically implement code changes?", default=False)
+    fork = False
+    branch = "hackathon-revamp"
+    
+    if implement:
+        fork = typer.confirm("Fork the repository before making changes?", default=True)
+        branch = typer.prompt("Branch name for changes", default="hackathon-revamp")
+    
+    # Step 3: Execute
+    console.print(f"\n[bold]Step 3: Running revamp...[/bold]")
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        task = progress.add_task(description="Generating strategy...", total=None)
+        
+        if implement:
+            result = revamp_and_implement(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                search_topic=topic,
+                implement_changes=True,
+                fork_repo=fork,
+                branch_name=branch
+            )
+            console.print(Panel(Markdown(result["strategy"]), title="Strategy", border_style="green"))
+            if result.get("implementation"):
+                console.print(Panel(Markdown(result["implementation"]), title="Implementation", border_style="yellow"))
+        else:
+            result = revamp_project(
+                github_url=github_url,
+                hackathon_url=hackathon_url,
+                search_topic=topic
+            )
+            console.print(Panel(Markdown(result), title="Revamp Strategy", border_style="green"))
+
+@app.command()
+def web():
+    """
+    Start the web interface.
+    """
+    console.print(Panel("🌐 Starting Web Interface", style="blue"))
+    console.print("Opening web interface at http://localhost:8000")
+    console.print("Press Ctrl+C to stop\n")
+    
+    try:
+        import subprocess
+        subprocess.run(["uv", "run", "python", "app/web_interface.py"], check=True)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Web interface stopped.[/yellow]")
+    except subprocess.CalledProcessError:
+        console.print("[red]Failed to start web interface. Check your setup.[/red]")
+
+@app.command()
+def setup():
+    """
+    Run the interactive setup wizard.
+    """
+    console.print(Panel("⚙️ Setup Wizard", style="green"))
+    
+    try:
+        import subprocess
+        subprocess.run(["python", "setup_wizard.py"], check=True)
+    except subprocess.CalledProcessError:
+        console.print("[red]Setup failed. Please check the error messages above.[/red]")
+
+@app.command()
+def examples():
+    """
+    Show usage examples and tutorials.
+    """
+    console.print(Panel("📚 Revamp Agent Examples", style="magenta"))
+    
+    examples_text = """
+## Quick Examples
+
+### 1. Basic Analysis
+```bash
+revamp analyze --github https://github.com/user/repo --hackathon https://hackathon-site.com
+```
+
+### 2. Auto-Discovery
+```bash
+revamp analyze --topic "AI"
+```
+
+### 3. Full Implementation
+```bash
+revamp generate --github https://github.com/user/repo --hackathon https://hackathon-site.com --fork
+```
+
+### 4. Interactive Mode
+```bash
+revamp interactive
+```
+
+### 5. Web Interface
+```bash
+revamp web
+```
+
+## Popular Topics
+- **AI/ML**: artificial intelligence, machine learning, deep learning
+- **Web3**: blockchain, cryptocurrency, DeFi, NFT
+- **Climate**: sustainability, environment, carbon tracking
+- **Healthcare**: medical, health tech, telemedicine
+- **Fintech**: payments, banking, financial services
+- **IoT**: internet of things, sensors, smart devices
+
+## Pro Tips
+- Use `--fork` to safely make changes to repositories
+- Try discovery mode when you're not sure what to build
+- The web interface is great for non-technical team members
+- Interactive mode guides you through the entire process
+    """
+    
+    console.print(Markdown(examples_text))
+
+@app.command()
 def deploy():
     """
-    Prepare for deployment.
+    Deploy using Docker or cloud platforms.
     """
-    console.print(Panel("🚀 Preparing for deployment...", style="blue"))
-    # Placeholder for deployment logic - e.g., building docker image, checking requirements
-    console.print("[dim]Checking configuration...[/dim]")
-    console.print("[dim]Verifying dependencies...[/dim]")
-    console.print("[green]✓[/green] Ready for deployment! (This is a placeholder action)")
+    console.print(Panel("🚀 Deployment Options", style="blue"))
+    
+    console.print("[bold]Available deployment methods:[/bold]")
+    console.print("1. Docker Compose (local)")
+    console.print("2. Railway (cloud)")
+    console.print("3. Render (cloud)")
+    console.print("4. Heroku (cloud)")
+    
+    method = typer.prompt("Choose deployment method (1-4)", type=int)
+    
+    if method == 1:
+        console.print("\n[bold]Docker Compose Deployment:[/bold]")
+        console.print("1. Make sure Docker is installed")
+        console.print("2. Copy your .env file to the project root")
+        console.print("3. Run: docker-compose up -d")
+        console.print("4. Access at http://localhost:8000")
+        
+        if typer.confirm("Start Docker deployment now?"):
+            try:
+                subprocess.run(["docker-compose", "up", "-d"], check=True)
+                console.print("[green]✓[/green] Deployment started!")
+            except subprocess.CalledProcessError:
+                console.print("[red]Deployment failed. Check Docker installation.[/red]")
+    
+    elif method == 2:
+        console.print("\n[bold]Railway Deployment:[/bold]")
+        console.print("1. Install Railway CLI: npm install -g @railway/cli")
+        console.print("2. Login: railway login")
+        console.print("3. Deploy: railway up")
+        console.print("4. Set environment variables in Railway dashboard")
+    
+    elif method == 3:
+        console.print("\n[bold]Render Deployment:[/bold]")
+        console.print("1. Connect your GitHub repo to Render")
+        console.print("2. Choose 'Web Service'")
+        console.print("3. Build command: uv sync")
+        console.print("4. Start command: uv run python app/web_interface.py")
+        console.print("5. Add environment variables in Render dashboard")
+    
+    elif method == 4:
+        console.print("\n[bold]Heroku Deployment:[/bold]")
+        console.print("1. Install Heroku CLI")
+        console.print("2. heroku create your-app-name")
+        console.print("3. git push heroku main")
+        console.print("4. heroku config:set OPENAI_API_KEY=your_key")
+        console.print("5. Add other environment variables as needed")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,11 @@
-from app.tools.discovery import HackathonDiscoveryTools
-from app.tools.github import ExtendedGithubTools
+"""
+Custom tools for the Revamp Agent.
+"""
 
-__all__ = ["HackathonDiscoveryTools", "ExtendedGithubTools"]
+from .discovery_tools import HackathonDiscoveryTools
+from .base_tool import BaseTool
+
+__all__ = [
+    "HackathonDiscoveryTools",
+    "BaseTool"
+]
